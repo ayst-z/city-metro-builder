@@ -155,7 +155,7 @@ function main() {
   const opsMissing = ['hourlyDemand', 'recommendSchedule', 'applySchedule', 'restoreSchedule', 'readFares', 'recommendFares', 'applyFares', 'audit', 'recommendNetwork', 'applyRevenuePlan', 'optimizeRevenue', 'revenueSnapshot', 'revenueDelta', 'applyExpress', 'applyShortTurn', 'flowStatus', 'refreshFlow'].filter((k) => typeof OPS[k] !== 'function');
   if (OPS.__version !== '1.3.5') failures.push(`OPS 版本 ${OPS.__version} != 期望 1.3.5`);
   const AP = w.MetroAutopilot || {};
-  if (AP.version !== '0.3.1' || ['start', 'stop', 'status', 'tick'].some(k => typeof AP[k] !== 'function')) failures.push('MetroAutopilot API/version mismatch');
+  if (AP.version !== '0.3.2' || ['start', 'stop', 'status', 'tick'].some(k => typeof AP[k] !== 'function')) failures.push('MetroAutopilot API/version mismatch');
   if (opsMissing.length) failures.push('OPS 缺少: ' + opsMissing.join(', '));
 
   // 纯函数行为抽查

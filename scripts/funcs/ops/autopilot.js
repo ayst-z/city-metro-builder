@@ -12,11 +12,11 @@
  */
 (function () {
   'use strict';
-  if (window.MetroAutopilot && window.MetroAutopilot.version === '0.3.1') return;
-  var AP = { version: '0.3.1' };
+  if (window.MetroAutopilot && window.MetroAutopilot.version === '0.3.2') return;
+  var AP = { version: '0.3.2' };
   var DEFAULT_STRATEGY = { perLineCap: 12, perLineInc: 4, maxNewExpressShort: 1, regressionThreshold: 50000, analysisEvery: 10, buyPacks: 1 };
   var LIMITS = { perLineCap: [4, 16], perLineInc: [1, 8], maxNewExpressShort: [0, 2], buyPacks: [1, 3] };
-  var state = { running: false, ticks: 0, log: [], timer: null, opts: null, last: null, prevSnapshot: null, pendingAnalysis: null, preTick: null, strategy: Object.assign({}, DEFAULT_STRATEGY), history: [], converge: 0, lastNet: null, regressStreak: 0 };
+  var state = { running: false, ticks: 0, log: [], timer: null, opts: null, last: null, prevSnapshot: null, pendingAnalysis: null, preTick: null, lastAnalysisTick: -1, strategy: Object.assign({}, DEFAULT_STRATEGY), history: [], converge: 0, lastNet: null, regressStreak: 0 };
 
   function ops() { return window.MetroOps; }
   function oe() { return window.OfficialEdit; }
@@ -108,7 +108,8 @@
     if (delta && delta.net < -Math.abs(S.regressionThreshold)) r.push('revenue-regression');
     if (flow && flow.ok === false) r.push('flow-not-loaded');
     if (state.regressStreak >= 2) r.push('repeated-regression');
-    if (S.analysisEvery && state.ticks > 0 && state.ticks % S.analysisEvery === 0) r.push('periodic-analysis');
+    // 周期巡检：以「距上次分析的 tick 数」判定，防 tick 不前进时反复触发（2026-11-13 修死锁）
+    if (S.analysisEvery && state.ticks > 0 && state.ticks - state.lastAnalysisTick >= S.analysisEvery) r.push('periodic-analysis');
     return r;
   }
 
@@ -173,6 +174,7 @@
     var flow = null; try { flow = O.flowStatus ? O.flowStatus() : null; } catch (e) { flow = null; }
     var reasons = analysisReasons(delta, flow, S);
     if (reasons.length && !dry) {
+      state.lastAnalysisTick = state.ticks;
       state.pendingAnalysis = { reasons: reasons, tick: state.ticks, requestedAt: Date.now(), context: { delta: delta, flowOk: flow ? flow.ok : null, strategy: Object.assign({}, state.strategy) } };
       log('analysis-request', state.pendingAnalysis);
       if (typeof opts.onAnalysis === 'function') { try { opts.onAnalysis(state.pendingAnalysis); } catch (e) { log('onAnalysis-error', String(e)); } }
@@ -234,7 +236,7 @@
       applied.strategy = Object.assign({}, state.strategy);
     }
     log('analysis-resolved', { reasons: state.pendingAnalysis.reasons, applied: applied });
-    state.pendingAnalysis = null; state.regressStreak = 0;
+    state.pendingAnalysis = null; state.regressStreak = 0; state.lastAnalysisTick = state.ticks;
     return { ok: true, applied: applied };
   };
 

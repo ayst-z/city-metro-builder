@@ -32,6 +32,7 @@
 - 直接 API：`MetroEconomy.setFareRules('metro', rules)` + `metroApplyFareRulesChanged()`；UI 路径：`.line-info-fare-watch` 改值 → `#line-info-fare-confirm`。
 - **官方票价→需求模型**：`metroFareDemandPenaltyForFare(fare, baseline)`，国内 baseline=0.75；票价/基准 >1 时需求指数衰减（fare=2 时需求≈24%，fare=3≈4%，fare=4+≈1% 地板）。**单程收入最大票价 ≈1.05（1.0–1.1 区间）**；当前 1/2/3/4/5 阶梯中 2–5 元段严重压制需求。
 - **实际生效条件**：票价 overlay 需要 OD/经营模式（`G.hourlyODBase` 非空、`_metroFareDemandOverlayActive=true`）。创意小网络实测 `od=false/overlayActive=false`：票价能写入但不会改变客流；经营模式再验证实际弹性。
+- **经营档实测**：新档默认 `G.paused=true`，`togglePause()` 恢复；`setSpeed(60,document.body)` 加速（最大 200×）。初始 $6.8M / 20km / 16 站 / 54 车厢。3 站测试线耗配额 3.8km/3 站，余额不变；`pending` 按小时桶重置（跨整点比较会出负增量），08:00 结算余额 +$556。经营 3 站线票价 1.05 后 643 人次/$660.45；overlay 仍未激活。
 
 ## 2. 列车信息面板
 
@@ -81,6 +82,7 @@
 
 - 入口：HUD `#metro-quota-dock` 的额度环；`openMetroQuotaPurchaseCenter()`；面板 `#metro-quota-purchase-panel`。
 - 项目：里程 $300,000/10km、车站 $150,000/5站、车厢 $60,000/6节、快速列车车厢 $360,000/6节；`metroQuotaHandlePurchase(key,units)` 写入。
+- 实测：买 km×2 + stations×2 + expressLines×1，余额 7,076,385→5,774,156（含约4–6%费用）；配额 total/purchased 增加。
 - **配额可用余额购买**；建线只消耗 km/stations，快车消耗 cars/快线额度。
 
 ## 5.2 快车 / 交路面板

@@ -1,12 +1,12 @@
 # city-metro-builder · 地铁绘制与全自动经营托管技能
 
-`beta1.0`
+`beta1.1`
 
 在 [Cities Designers](https://www.citiesdesigners.com)（城市设计师·地铁模拟）里，用**游戏官方接口**绘制地铁线路、按规划图复刻线网、并全自动托管经营。本仓库是一个 Agent Skill：加载即用的指南（`SKILL.md`）+ 可注入工具箱（`scripts/funcs/`）+ 离线图像管线（`scripts/plan-map.py`）+ 回归测试（`_dev/`）。
 
 ## 下载
 
-[GitHub Releases](https://github.com/ayst-z/city-metro-builder/releases) 提供 **纯净整合包 ZIP**（`city-metro-builder-beta1.0-oss.zip`，解压即为技能目录，不含赞赏码）。仓库本体含赞赏码（见文末），发行包不含。
+[GitHub Releases](https://github.com/ayst-z/city-metro-builder/releases) 提供 **纯净整合包 ZIP**（`city-metro-builder-beta1.1-oss.zip`，解压即为技能目录，不含赞赏码）。仓库本体含赞赏码（见文末），发行包不含。
 
 ## 界面预览
 
@@ -35,6 +35,16 @@
 | PlanMap | `PlanMap` | 规划图复刻（图纸→几何→官方绘制） |
 | Autopilot | `MetroAutopilot` | 全自动经营托管（自递归+AI 分析升级） |
 | Modes | `CityTransportModes` 等 | 高铁/航空多模式预留 |
+
+## 文档
+
+| 文档 | 内容 |
+|---|---|
+| [docs/QUICKSTART.md](docs/QUICKSTART.md) | 3 分钟上手：注入顺序、查数据、绘制、四检、回滚 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 分层、注入与版本守卫、数据流、关键不变量、扩展点 |
+| [docs/FAQ.md](docs/FAQ.md) | 排障：查不到、乱序、避让、环线支线、恢复、经营、安全 |
+| [docs/PRIVACY.md](docs/PRIVACY.md) | 隐私审核范围、结论与数据合规 |
+| [references/](references/) | 专题：api-reference（全量函数）/ official-draw / operations / plan-map-draw / … |
 
 ## 官方绘线
 
@@ -66,7 +76,7 @@
 
 ## 怎么用
 
-拷贝本目录到 agent skills 目录；或按序注入：`mt-core → mt-node → mt-amap → od → k →（可选）ops/autopilot/official-edit/fare-lab/modes/plan-map`。示例：
+拷贝本目录到 agent skills 目录；或按序注入（详见 [docs/QUICKSTART.md](docs/QUICKSTART.md)）：`mt-core → mt-node → mt-amap → od → k →（可选）ops/autopilot/official-edit/fare-lab/modes/plan-map`。示例：
 ```js
 const r = await MT.queryLine('上海','17',{stationFrom:'西岑',stationTo:'虹桥火车站'});
 await OD.drawLine(lineId, r.stations, r.nodes, {});
@@ -86,8 +96,21 @@ references/         专题：api-reference(全量函数)/plan-map-draw/metro-pla
 scripts/funcs/      注入工具箱（query/draw/manage/ops/modes）
 scripts/plan-map.py 离线配准+追线
 _dev/               回归测试
-docs/               THIRD_PARTY / 赞赏码
+docs/               第三方声明 / 截图 / 文档 / 赞赏码
 ```
+
+## 更新日志
+
+### beta1.1（2026-11-13）
+
+- **Autopilot 0.3.1**：营收劣化自动回滚（`captureConfig` 快照 + `rollback`），回归 12 项
+- **OD 2.60.3**：几何去重——`_haversineM`/`localTurn`/`distM` 委托 MT，`_chainRatio` 合并 6 处绕路检测
+- **文档**：`api-reference` 逐函数详解扩写；`update-2026-09-27`/`efficient-mode` 并入 `operations`，`metro-diagram` 并入 `ui-features`
+- **发行包**：补齐 `scripts/funcs` 模块说明；与技能源逐文件一致（打包时校验）
+
+### beta1.0（2026-11-10）
+
+首个开源整合包：官方绘线 + 规划图复刻 + 经营运营 + MetroAutopilot 0.3.0 全自动托管。
 
 ## 隐私与许可
 
