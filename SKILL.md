@@ -7,7 +7,7 @@ description: '在 Cities Designers（citiesdesigners.com 城市设计师·地铁
 
 > ⚡ **答复最高准则（2026-09-06，凌驾其它一切约定）**：**不要输出任何礼貌性用语**——不寒暄/不道歉/不写"好的·收到·没问题·请问·请·辛苦·祝·期待"等客套；**直接给出最有用的信息**：先结论（结果/判定/差异/数据）→ 最小必要解释 → 下一步动作。能用要点/表格一句话说完，不写三句。
 
-> **版本（2026-11-12 v4.3 / 开源 beta1.1）**：MT **6.5.3/6.5.4/6.5.3**（core/node/amap）· OD **2.60.3** · K **2.9** · Ops **1.3.5** · OE **1.1.8** · FareLab **1.0.1** · Modes **0.1.0** · PlanMap **1.1.1**（可选）· MetroAutopilot **0.3.1**（可选，全自动经营托管）。代码基线 = `scripts/funcs/`；函数表按源码实际导出键校准（MT 84 / OD 38 / K 62，见 §10）。v3 高效版已并入本技能（`references/operations.md` §23）；**默认高德 + AMap/OSM 双引擎特调**（`references/map-engines.md`）；全游戏功能矩阵见 `references/game-features.md`；多模式预留见 `scripts/funcs/modes/README.md`；浏览器扩展为废案，不再维护或注入。
+> **版本（2026-11-12 v4.3 / 开源 beta1.2）**：MT **6.5.3/6.5.4/6.5.3**（core/node/amap）· OD **2.60.3** · K **2.9** · Ops **1.3.5** · OE **1.1.8** · FareLab **1.0.1** · Modes **0.1.0** · PlanMap **1.1.1**（可选）· MetroAutopilot **0.3.1**（可选，全自动经营托管）。代码基线 = `scripts/funcs/`；函数表按源码实际导出键校准（MT 84 / OD 38 / K 62，见 §10）。v3 高效版已并入本技能（`references/operations.md` §23）；**默认高德 + AMap/OSM 双引擎特调**（`references/map-engines.md`）；全游戏功能矩阵见 `references/game-features.md`；多模式预留见 `scripts/funcs/modes/README.md`；浏览器扩展为废案，不再维护或注入。
 > **2026-09-27 更新适配**：9-24/9-27 新增经营模式/高铁/航空/Voyager，指引与经济全局 API 速查见 `references/operations.md` §22（不影响 §1-§8 绘线主流程）。
 > **本版架构**：`§0 最高全局要求（先读）` → `§1-§8 功能板块`（每板块=功能定位/调用逻辑/使用规则/注意事项）→ `§9 不便分类的条件特例` → `§10 函数速查表`。
 > **旧文档备份**：`SKILL.pre_rearch.md` / `SKILL.bak_*.md`（历史实测细节全文保留，供回溯）。

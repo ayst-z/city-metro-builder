@@ -1,12 +1,12 @@
 # city-metro-builder · 地铁绘制与全自动经营托管技能
 
-`beta1.1`
+`beta1.2`
 
 在 [Cities Designers](https://www.citiesdesigners.com)（城市设计师·地铁模拟）里，用**游戏官方接口**绘制地铁线路、按规划图复刻线网、并全自动托管经营。本仓库是一个 Agent Skill：加载即用的指南（`SKILL.md`）+ 可注入工具箱（`scripts/funcs/`）+ 离线图像管线（`scripts/plan-map.py`）+ 回归测试（`_dev/`）。
 
 ## 下载
 
-[GitHub Releases](https://github.com/ayst-z/city-metro-builder/releases) 提供 **纯净整合包 ZIP**（`city-metro-builder-beta1.1-oss.zip`，解压即为技能目录，不含赞赏码）。仓库本体含赞赏码（见文末），发行包不含。
+[GitHub Releases](https://github.com/ayst-z/city-metro-builder/releases) 提供 **纯净整合包 ZIP**（`city-metro-builder-beta1.2-oss.zip`，解压即为技能目录，不含赞赏码）。仓库本体含赞赏码（见文末），发行包不含。
 
 ## 界面预览
 
@@ -40,10 +40,9 @@
 
 | 文档 | 内容 |
 |---|---|
-| [docs/QUICKSTART.md](docs/QUICKSTART.md) | 3 分钟上手：注入顺序、查数据、绘制、四检、回滚 |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 分层、注入与版本守卫、数据流、关键不变量、扩展点 |
-| [docs/FAQ.md](docs/FAQ.md) | 排障：查不到、乱序、避让、环线支线、恢复、经营、安全 |
+| [docs/GUIDE.md](docs/GUIDE.md) | 快速开始（注入顺序/查询/绘制/四检/回滚）+ 架构（分层/数据流/不变量/扩展点）+ 13 条排障 |
 | [docs/PRIVACY.md](docs/PRIVACY.md) | 隐私审核范围、结论与数据合规 |
+| [docs/THIRD_PARTY.md](docs/THIRD_PARTY.md) | 第三方数据与算法来源 |
 | [references/](references/) | 专题：api-reference（全量函数）/ official-draw / operations / plan-map-draw / … |
 
 ## 官方绘线
@@ -76,7 +75,7 @@
 
 ## 怎么用
 
-拷贝本目录到 agent skills 目录；或按序注入（详见 [docs/QUICKSTART.md](docs/QUICKSTART.md)）：`mt-core → mt-node → mt-amap → od → k →（可选）ops/autopilot/official-edit/fare-lab/modes/plan-map`。示例：
+拷贝本目录到 agent skills 目录；或按序注入（详见 [docs/GUIDE.md](docs/GUIDE.md)）：`mt-core → mt-node → mt-amap → od → k →（可选）ops/autopilot/official-edit/fare-lab/modes/plan-map`。示例：
 ```js
 const r = await MT.queryLine('上海','17',{stationFrom:'西岑',stationTo:'虹桥火车站'});
 await OD.drawLine(lineId, r.stations, r.nodes, {});
@@ -100,6 +99,13 @@ docs/               第三方声明 / 截图 / 文档 / 赞赏码
 ```
 
 ## 更新日志
+
+### beta1.2（2026-11-13）
+
+- **结构整合**：发行产物不再入库，由 `tools/build-release.mjs` 生成到 `release/.build/`（Git 忽略）；仓库文件数约减半，源与产物不再三份并存
+- **文档合并**：`QUICKSTART` + `ARCHITECTURE` + `FAQ` → 一篇 `docs/GUIDE.md`（上手 / 架构 / 排障）
+- **打包校验**：生成后解包 zip 逐文件比对 SHA-256，防止产物与源漂移
+- 技能代码与 beta1.1 一致（无逻辑改动）
 
 ### beta1.1（2026-11-13）
 
