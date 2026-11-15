@@ -1,6 +1,6 @@
 # 使用指南
 
-> 一篇看完：快速上手 → 架构与不变量 → 排障。技能 v4.3 · 发行 beta1.2。
+> 一篇看完：快速上手 → 架构与不变量 → 排障。技能 v4.4 · 发行 beta1.3（已发布）。
 
 ## 快速开始
 
@@ -9,24 +9,44 @@
 ### 0. 前置条件
 
 - 游戏 [Cities Designers](https://www.citiesdesigners.com) 已进入城市、存档就绪；**模式/存档界面由用户自己选**，AI 不代点。
-- 能把 `scripts/funcs/*.js` 注入页面（浏览器控制台、CDP `Runtime.evaluate`、宿主 Agent 的脚本工具均可）。
+- 能把 `scripts/funcs/*.js` 注入页面（浏览器控制台、CDP `Runtime.evaluate`、宿主 Agent 的脚本工具均可）。把 zip 解压到宿主的 agent skills 目录，目录名保持 `city-metro-builder`；也可直接用完整仓库的 `skills/city-metro-builder`。
+- **CDP 控制服务（一次注入的前置）**：注入器通过 CDP 控制服务下发脚本。浏览器桥在**完整仓库**的 `browser/cdp.mjs`，**发行 zip 只含技能目录、不含该桥**；在完整仓库启动服务后，把 `<cdp-host>:<port>` 传给 `--cdp`。兼容桥至少提供 `POST /script` 与 `POST /eval`。
+- **没有兼容桥时**：不要硬试或猜端口，直接按本文「手动注入」逐文件注入（效果等价，只是没有版本表与自动中止）。
+- Node.js：建议 20.11+（与仓库构建/校验工具一致）；注入器本身只依赖 Node 基础能力。
 - 能访问高德：默认数据源链是 srhdata → 游戏内高德 → 免费 Web → POI。
 
-### 1. 按顺序注入
+### 1. 注入（一次注入优先）
 
-顺序不能乱（几何依赖 MT，OD 依赖 MT，K 依赖 OD）；同版本重复注入会被版本守卫跳过。
+**推荐：一次注入**——技能自带 `scripts/inject-toolbox.js`，一条命令按稳定依赖顺序幂等装好 **13 个核心模块**（5 必需 + 8 可选），并打印逐模块结果 / 版本表 / 缺失与版本不符报告：
 
-| 顺序 | 文件 | 注入后全局 |
-|---|---|---|
-| 1 | `query/mt-core.js` | `__metroToolkit` |
-| 2 | `query/mt-node.js` | 同上（几何） |
-| 3 | `query/mt-amap.js` | 同上（数据源） |
-| 4 | `draw/od.js` | `__officialDraw` |
-| 5 | `manage/k.js` | `CityMetroKit` |
-| 6（可选） | `ops/ops.js` → `ops/autopilot.js` | `MetroOps` / `MetroAutopilot` |
-| 7（可选） | `manage/official-edit.js`、`manage/fare-lab.js` | `OfficialEdit` / `FareLab` |
-| 8（可选） | `modes/mode-registry.js` 等 | `CityTransportModes` 等 |
-| 9（可选） | `draw/plan-map.js` + 离线 `scripts/plan-map.py` | `PlanMap` |
+```bash
+node <skill-root>/scripts/inject-toolbox.js --cdp <cdp-host>:<port>
+# --dry-run 只预检+版本表 · --json 机器可读 · --required-only 仅 5 必需 · --optional ops,fare-lab
+# --allow-downgrade 页面版本比期望更新时强制覆盖（默认拒绝）
+```
+
+- 退出码：`0` 全绿 / `2` 降级（可选模块失败，核心可用）/ `1` 失败或中止 / `64` 用法错误。
+- 缺必需文件、或页面版本比期望更新（默认不降级）→ 注入前就失败、零注入；必需模块失败立即中止并报 `partial=true`，不会假装装好；可选模块失败只算降级。
+- 页面侧只读核对 `window.__metroToolboxVerify()`；结论写在 `window.__metroToolboxInjection`；清单与期望版本用 `window.__metroToolboxManifest()` 查看。
+- **范围**：这 13 个核心模块之外，`metro-unopened-paths.js`（未开通线瓦片）与 srhdata（`__SUBMETRO_DATA`/`__MT_SUBMETRO_DATA`）按需**单独注入**，不在一次注入清单内。
+
+**等价的手动注入**（宿主没有 CDP 控制服务时）：顺序不能乱（几何依赖 MT，OD 依赖 MT，K 依赖 OD；Autopilot 依赖 Ops/OE/K）；同版本重复注入会被版本守卫跳过。
+
+| 顺序 | 文件 | 注入后全局 | 期望版本 |
+|---|---|---|---|
+| 1 | `query/mt-core.js` | `__metroToolkit` | 6.5.3 |
+| 2 | `query/mt-node.js` | 同上（几何） | 6.5.4 |
+| 3 | `query/mt-amap.js` | 同上（数据源） | 6.5.3 |
+| 4 | `draw/od.js` | `__officialDraw` | 2.60.3 |
+| 5 | `manage/k.js` | `CityMetroKit` | 2.9 |
+| 6（可选） | `draw/plan-map.js` + 离线 `scripts/plan-map.py` | `PlanMap` | 1.1.1 |
+| 7（可选） | `ops/ops.js` | `MetroOps` | 1.3.5 |
+| 8（可选） | `manage/official-edit.js` | `OfficialEdit` | 1.1.8 |
+| 9（可选） | `manage/fare-lab.js` | `FareLab` | 1.0.1 |
+| 10（可选） | `ops/autopilot.js`（依赖 Ops/OE/K） | `MetroAutopilot` | 0.3.2 |
+| 11（可选） | `modes/mode-registry.js` | `CityTransportModes` | 0.1.0 |
+| 12（可选） | `modes/hsr-probe.js` | `HsrProbe` | 0.1.0 |
+| 13（可选） | `modes/air-probe.js` | `AirProbe` | 0.1.0 |
 
 ### 2. 查真实线位
 
@@ -74,9 +94,21 @@ K.listAudit();         // 改动审计
 
 RED 风险（删整线、跨城覆盖、批量删除）未确认不执行；未知线路/自绘内容一律保留。
 
+### 7. 自检与修复工具
+
+| 工具 | 入口（注入后） | 用途 |
+|---|---|---|
+| `scripts/beta2-selfcheck.js` | `__beta2SelfCheck()` / `__beta2SelfCheck({ live: true })` / `__beta2SelfCheckText()` | 发版前实机自检：只读 19 项（引擎/票价/排班/快车/额度/客流/营收/换乘组/空节点/入口/函数）；`live:true` 记录暂停/速度→暂停→排班往返/票价幂等→**只读**换乘审计→`finally` 恢复，返回 `livePass` 与恢复证据；`__beta2SelfCheckText()` 直接给人类可读报告 |
+| `scripts/transfer-coords.js` | `__transferCoordAudit({ city? })` / `__transferCoordFix({ city?, dryRun, rebuildNodes })` / `__separateSharedStations()` | 换乘站坐标审计与修复：报 `dev>30m`、`out_of_path`、共享坐标组；修复按**本线 SUBWAY path 投影**，out_of_path 用相邻站局部 path 回退，与伙伴线 >150m 置 `transferSpatiallyUnlinked` |
+| `scripts/inject-toolbox.js` | Node 侧命令（见「注入」） | 一次注入 + 版本表 + 缺失/版本不符报告 |
+
+- **live 安全口径**：换乘部分只做前后指纹对比，不调用 `fixTransfers`/`separateTransferStations`/`applyTransfer` 等写接口；无论成功或异常，都在 `finally` 恢复原暂停状态与模拟速度。该实现正在做离线验证，本轮**尚待实机复跑**（见 `references/beta2-acceptance.md` §2）。
+- beta1.3 门禁见 `references/beta2-acceptance.md` §4（该文档与 `beta2-selfcheck.js` 沿用 beta2 技术命名）：层1 离线全绿 → 层2 `fail=0` → 层3 `livePass=true` 且状态恢复 → 层4 UI 开关 → 层5 创意档绘线。
+- 换乘修复前先 `K.snapshot`；改坐标后必须 `OD.rebuildNodesFromAmap` 重生成节点；验收 `dev≈0` 为合格（与伙伴线同点不算错），`dev>300m` 判 out_of_path。
+
 ## 架构
 
-> 代码基线：`scripts/funcs/`（拆分架构，唯一权威）。几何单一权威是 MT，OD / K / PlanMap / mt-amap 全部委托它，不本地复制。
+代码基线：`scripts/funcs/`（拆分架构，唯一权威）。几何单一权威是 MT，OD / K / PlanMap / mt-amap 全部委托它，不本地复制。
 
 ### 分层
 
@@ -98,11 +130,15 @@ RED 风险（删整线、跨城覆盖、批量删除）未确认不执行；未�
 
 ```
 mt-core → mt-node → mt-amap → od → k
-        → (可选) ops → autopilot → official-edit → fare-lab → modes → plan-map
+        → (可选) plan-map → ops → official-edit → fare-lab → autopilot
+        → (可选) mode-registry → hsr-probe → air-probe
 ```
 
+- 一次性入口：`scripts/inject-toolbox.js` 按上序幂等加载 **13 个核心模块**（5 必需 + 8 可选），输出逐模块结果 + 版本表 + 缺失/版本不符清单；清单（含期望版本与依赖）在注入器 `MANIFEST` 内，与 `SKILL.md` §2.4 互为校验。
+- `autopilot` 依赖 Ops/OE/K，必须排在 `official-edit` 之后；注入器用 `dependsOn` 做稳定拓扑排序，不是只靠手写顺序。
+- 失败语义：必需模块失败即中止并报 `partial=true`；可选失败只降级（exit 2）；缺文件或页面版本更新在注入前就失败、零注入。
 - 每个模块自带 `__version`，同版本重复注入直接跳过（版本守卫）。
-- 改脚本必须同时：① bump 模块版本；② 同步 `_dev/smoke.js` 的 `EXPECT_VERSION`；③ 更新 `SKILL.md` §2.4 版本表。
+- 改脚本必须同时：① bump 模块版本；② 同步 `_dev/smoke.js` 的 `EXPECT_VERSION`；③ 更新 `SKILL.md` §2.4 版本表与注入器 `MANIFEST`。
 
 ### 数据流
 
@@ -135,10 +171,14 @@ mt-core → mt-node → mt-amap → od → k
 
 ```
 SKILL.md              主指南（§0 全局硬规则 → §1-8 板块 → §9 特例 → §10 函数速查）
-references/           专题文档（api-reference / official-draw / operations / plan-map-draw …）
+references/           专题文档（api-reference / official-draw / operations / plan-map-draw / beta2-acceptance …）
 scripts/funcs/        注入工具箱
+scripts/inject-toolbox.js  一次注入编排（13 核心模块：幂等 + 版本表/缺失报告）
+scripts/beta2-selfcheck.js 页面只读自检 + live 只读往返 + 文本报告
+scripts/transfer-coords.js 换乘坐标审计/修复（本线 path 投影）
 scripts/plan-map.py   离线配准 + 追线
-_dev/                 回归测试（lint / smoke / 几何 / POI / 支线环线 / Autopilot）
+_dev/run-all.mjs      7 组离线回归一键入口
+_dev/                 其余单组测试
 docs/                 本文档集（quickstart / architecture / FAQ / privacy / THIRD_PARTY）
 ```
 
@@ -150,7 +190,7 @@ docs/                 本文档集（quickstart / architecture / FAQ / privacy /
 
 ### 回归
 
-改几何/数据源/绘制必跑：`node _dev/smoke.js`、`node _dev/test-plan-draw.js`、`node _dev/test-plan-poi.js`、`node _dev/lint-static.js`；规划图改动加跑 `python _dev/test-plan-map.py`（需要 OpenCV）。
+改几何/数据源/绘制必跑：`node _dev/run-all.mjs`（7 组一键，逐项 PASS/FAIL，失败/超时非 0 退出）；单组排障用 `node _dev/smoke.js`、`node _dev/test-plan-draw.js`、`node _dev/test-plan-poi.js`、`node _dev/lint-static.js`，规划图改动加跑 `python _dev/test-plan-map.py`（需要 OpenCV）。
 
 ## 常见问题与排障
 
@@ -200,7 +240,9 @@ docs/                 本文档集（quickstart / architecture / FAQ / privacy /
 
 **Q7. 注入后没反应 / 版本没更新？**
 
+- 先跑 `node <skill-root>/scripts/inject-toolbox.js --dry-run`：一次看到版本表、缺失文件与「页面版本比期望更新」的拦截，不用逐个猜。
 - 版本守卫：同版本重复注入会被跳过。改脚本后必须 bump 版本（`__version`）再注入，否则页面还是旧逻辑。
+- 注入器报 `partial=true` 说明页面只装了一部分（必需模块失败后中止）：按报告修好失败模块后重跑，同版本会自动跳过。
 - 核对目标页面是否同一个（多标签页各自独立）。
 
 **Q8. 页面卡死 / 重载后线路没了？**
@@ -216,6 +258,7 @@ docs/                 本文档集（quickstart / architecture / FAQ / privacy /
 **Q10. 回归测试跑不起来？**
 
 - `test-plan-map.py` 需要 OpenCV（`pip install opencv-python`）；纯 JS 用例（smoke / lint / plan-draw / plan-poi / branch-ring / autopilot）不需要 Python。
+- 一条命令跑全量：`node _dev/run-all.mjs`；单组超时可用 `--timeout <ms>` 覆盖。
 
 ### 经营
 

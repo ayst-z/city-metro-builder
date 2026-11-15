@@ -7,7 +7,7 @@ description: '在 Cities Designers（citiesdesigners.com 城市设计师·地铁
 
 > ⚡ **答复最高准则（2026-09-06，凌驾其它一切约定）**：**不要输出任何礼貌性用语**——不寒暄/不道歉/不写"好的·收到·没问题·请问·请·辛苦·祝·期待"等客套；**直接给出最有用的信息**：先结论（结果/判定/差异/数据）→ 最小必要解释 → 下一步动作。能用要点/表格一句话说完，不写三句。
 
-> **版本（2026-11-12 v4.3 / 开源 beta1.2）**：MT **6.5.3/6.5.4/6.5.3**（core/node/amap）· OD **2.60.3** · K **2.9** · Ops **1.3.5** · OE **1.1.8** · FareLab **1.0.1** · Modes **0.1.0** · PlanMap **1.1.1**（可选）· MetroAutopilot **0.3.1**（可选，全自动经营托管）。代码基线 = `scripts/funcs/`；函数表按源码实际导出键校准（MT 84 / OD 38 / K 62，见 §10）。v3 高效版已并入本技能（`references/operations.md` §23）；**默认高德 + AMap/OSM 双引擎特调**（`references/map-engines.md`）；全游戏功能矩阵见 `references/game-features.md`；多模式预留见 `scripts/funcs/modes/README.md`；浏览器扩展为废案，不再维护或注入。
+> **版本（2026-11-15 v4.4 / 开源 beta1.3 · 已发布）**：MT **6.5.3/6.5.4/6.5.3**（core/node/amap）· OD **2.60.3** · K **2.9** · Ops **1.3.5** · OE **1.1.8** · FareLab **1.0.1** · Modes **0.1.0** · PlanMap **1.1.1**（可选）· MetroAutopilot **0.3.2**（可选，全自动经营托管）。代码基线 = `scripts/funcs/`；函数表按源码实际导出键校准（MT 84 / OD 38 / K 62，见 §10）。v3 高效版已并入本技能（`references/operations.md` §23）；**默认高德 + AMap/OSM 双引擎特调**（`references/map-engines.md`）；全游戏功能矩阵见 `references/game-features.md`；多模式预留见 `scripts/funcs/modes/README.md`；浏览器扩展为废案，不再维护或注入。
 > **2026-09-27 更新适配**：9-24/9-27 新增经营模式/高铁/航空/Voyager，指引与经济全局 API 速查见 `references/operations.md` §22（不影响 §1-§8 绘线主流程）。
 > **本版架构**：`§0 最高全局要求（先读）` → `§1-§8 功能板块`（每板块=功能定位/调用逻辑/使用规则/注意事项）→ `§9 不便分类的条件特例` → `§10 函数速查表`。
 > **旧文档备份**：`SKILL.pre_rearch.md` / `SKILL.bak_*.md`（历史实测细节全文保留，供回溯）。
@@ -84,7 +84,7 @@ description: '在 Cities Designers（citiesdesigners.com 城市设计师·地铁
 | 批量管理库 | `window.CityMetroKit`(K) | 2.9 | `scripts/funcs/manage/k.js` |
 | 规划图普通线 | `window.PlanMap` | 1.1.1（`version`） | `scripts/funcs/draw/plan-map.js`（可选，MT/OD/K 之后；离线配套 `scripts/plan-map.py`） |
 | 客流运营 | `window.MetroOps`(Ops) | 1.3.5 | `scripts/funcs/ops/ops.js`（可选，K 之后注入；含快车/小交路写入；经营模式票价默认官方五段） |
-| 全自动经营托管 | `window.MetroAutopilot` | 0.3.1 | `scripts/funcs/ops/autopilot.js`（可选，Ops/OE 之后；仅 management；有界循环+回滚+日志） |
+| 全自动经营托管 | `window.MetroAutopilot` | 0.3.2 | `scripts/funcs/ops/autopilot.js`（可选，Ops/OE 之后；仅 management；有界循环+回滚+日志） |
 | 官方编辑（经营） | `window.OfficialEdit`(OE) | 1.1.8 | `scripts/funcs/manage/official-edit.js`（配色/编组确认、官方延长/支线、断线单线重绘、额度预算） |
 | 票价实验（经营） | `window.FareLab`(FL) | 1.0.1 | `scripts/funcs/manage/fare-lab.js`（调价/记录/候选方案/对比） |
 | 多模式注册表 | `window.CityTransportModes` | 0.1.0 | `scripts/funcs/modes/mode-registry.js`（metro/hsr/air 适配器契约） |
@@ -94,7 +94,11 @@ description: '在 Cities Designers（citiesdesigners.com 城市设计师·地铁
 | 未开通线瓦片 | `window.__metroUnopenedPaths` | — | `scripts/funcs/query/metro-unopened-paths.js`（可选注入） |
 | srhdata | `window.__SUBMETRO_DATA`/`__MT_SUBMETRO_DATA` | — | 运行时抓取/注入（可选） |
 
-**文件清单**：`SKILL.md`（主文档）· `references/{official-draw,batch-ops,plan-map-draw,api-reference,metro-planning-principles,metro-replication-workflow,map-engines,game-features,ui-features,operations}.md` · `scripts/funcs/{query/mt-core,query/mt-node,query/mt-amap,draw/od,draw/plan-map,manage/k,manage/official-edit,manage/fare-lab,modes/mode-registry,modes/hsr-probe,modes/air-probe}.js`（**唯一权威源码**）· `scripts/funcs/modes/README.md`（多模式结构与预留契约）· `scripts/{plan-map.py,fetch_subway_data.py,coordinate-transform.js,coordinate_transform.py,audit-game-features.js}` · `scripts/funcs/ops/ops.js`（客流运营）· `scripts/funcs/ops/autopilot.js`（全自动经营托管）· `_dev/{smoke,lint-static}.js`（Node VM 冒烟 + 静态一致性）· `_dev/test-plan-map.py`（10项）/`_dev/test-plan-poi.js`（17项）/`_dev/test-plan-draw.js`（45项）/`_dev/test-autopilot.js`（11项）/`_dev/test-branch-ring.js`（3项，规划图/POI/绘制/托管回归）。参考：`references/{ui-features,game-features,map-engines,operations}.md`。旧单文件（MT 5.5 / OD 2.29 / K 2.11）与浏览器扩展已归档，非注入基线。
+**核心工具箱 13 个**（5 必需 + 8 可选）：`mt-core/mt-node/mt-amap/od/k` + `plan-map/ops/official-edit/fare-lab/autopilot/mode-registry/hsr-probe/air-probe`；`metro-unopened-paths.js` 与 srhdata 数据不计入这 13 个，按需单独注入（见 §2.4）。
+
+**文件清单**：`SKILL.md`（主文档）· `references/{official-draw,batch-ops,plan-map-draw,api-reference,metro-planning-principles,metro-replication-workflow,map-engines,game-features,ui-features,operations,beta2-acceptance}.md` · `scripts/funcs/{query/mt-core,query/mt-node,query/mt-amap,draw/od,draw/plan-map,manage/k,manage/official-edit,manage/fare-lab,modes/mode-registry,modes/hsr-probe,modes/air-probe}.js`（**唯一权威源码**）· `scripts/funcs/modes/README.md`（多模式结构与预留契约）· `scripts/{inject-toolbox.js（一次注入编排）,plan-map.py,fetch_subway_data.py,coordinate-transform.js,coordinate_transform.py,audit-game-features.js,beta2-selfcheck.js,transfer-coords.js}` · `scripts/funcs/ops/ops.js`（客流运营）· `scripts/funcs/ops/autopilot.js`（全自动经营托管）· `_dev/run-all.mjs`（7 组离线回归一键入口）· `_dev/{smoke,lint-static}.js`（Node VM 冒烟 + 静态一致性）· `_dev/test-plan-map.py`（10项）/`_dev/test-plan-poi.js`（17项）/`_dev/test-plan-draw.js`（45项）/`_dev/test-autopilot.js`（12项）/`_dev/test-branch-ring.js`（3项，规划图/POI/绘制/托管回归）。参考：`references/{ui-features,game-features,map-engines,operations}.md`。旧单文件（MT 5.5 / OD 2.29 / K 2.11）与浏览器扩展已归档，非注入基线。
+
+**beta1.3 实机验收（beta2 自检工具，2026-11-15，v4.4 已发布）**：清单/记录见 `references/beta2-acceptance.md`（文件名与 `__beta2SelfCheck*` API 沿用 beta2 命名，属技术套件名，不代表发行版本）。页面注入 `scripts/beta2-selfcheck.js` 后：`await __beta2SelfCheck()` 只读自检，`await __beta2SelfCheck({live:true})` 做「记录暂停/速度→暂停→排班往返/票价幂等→只读换乘审计→finally 恢复」的实机往返；`__beta2SelfCheckText()` 返回人类可读报告。本轮层 1 已 7/7，层 2/3/4/5 尚待实机复跑，门禁以该文档 §4 为准。
 
 ---
 
@@ -114,9 +118,24 @@ description: '在 Cities Designers（citiesdesigners.com 城市设计师·地铁
 - **避免**：游戏未 ready 前点模式按钮；勿直调 tryRestore（缺 normalizer）；页面可能残留隐藏"删除线路"确认 dialog 勿误点确认。
 
 ### 2.4 工具箱注入（收到指令后执行一次）
-> **v4 拆分架构**：MT 为多文件共享 `window.__metroToolkit`，须按 `mt-core → mt-node → mt-amap → od → k` 顺序注入（od/k 依赖 MT）；srhdata（`__SUBMETRO_DATA`/`__MT_SUBMETRO_DATA`）与 `metro-unopened-paths.js` 可选注入（无库时实时查询降级）。
+> **v4 拆分架构**：MT 为多文件共享 `window.__metroToolkit`，须按 `mt-core → mt-node → mt-amap → od → k` 顺序注入（od/k 依赖 MT）。一次注入只覆盖 **13 个核心模块**（5 必需 + 8 可选）；srhdata（`__SUBMETRO_DATA`/`__MT_SUBMETRO_DATA`）与 `metro-unopened-paths.js` 不在清单内，按需单独注入（无库时实时查询降级）。
+
+**首选：一次注入**——`scripts/inject-toolbox.js`（Node 侧编排）按权威顺序幂等加载 13 个核心模块，输出加载结果 / 版本表 / 缺失与版本不符报告：
+- **浏览器桥前置**：一次注入依赖 CDP 控制服务（完整仓库 `browser/cdp.mjs`，提供 `POST /script` / `POST /eval`）；发行 zip 只含技能目录、不含该桥。没有兼容桥时不要硬试，改用下面的手动注入。
+```bash
+node <skill-root>/scripts/inject-toolbox.js --cdp <cdp-host>:<port>
+# --dry-run 只预检+版本表 · --json 机器可读 · --required-only 仅 5 必需 · --optional ops,fare-lab
+# --allow-downgrade 页面版本比期望更新时强制覆盖（默认拒绝）
+```
+- **权威顺序（13 个核心模块）**：`mt-core → mt-node → mt-amap → od → k`（必需）`→ plan-map → ops → official-edit → fare-lab → autopilot → mode-registry → hsr-probe → air-probe`（可选）。`autopilot` 依赖 Ops/OE/K，必须排在 `official-edit` 之后；注入器按 `MANIFEST.dependsOn` 做稳定拓扑排序，与本段、§1 表互为校验。
+- **幂等**：页面已是期望版本 → `skip`，不重复注入（模块自带同版守卫是第二道保险）。
+- **失败不半装**：缺必需文件、或页面版本比期望更新（默认不降级）→ 注入前失败退出、零注入；必需模块注入后版本不符 → 立即中止并报 `partial=true` + 已装清单；可选模块失败 → 降级（exit 2），核心功能仍可用。
+- **退出码**：`0` 全绿 · `2` 降级 · `1` 失败/中止 · `64` 用法错误。
+- **报告**：stdout 逐模块结果 + 版本表；`--json` 为同结构报告；结论写回页面 `window.__metroToolboxInjection`；页面侧只读核对 `window.__metroToolboxVerify()`（`{ok,coreOk,degraded,versionTable,missing,mismatched}`）与 `window.__metroToolboxManifest()`。脚本用自身位置推导技能根（`--root` 可覆盖），不含本机路径。
+
+**备选：手动逐个注入**（宿主无 CDP 控制服务时，顺序同上）：
 ```js
-// 路径 = 技能安装根（.copilot/skills/city-metro-builder 或仓库 skills/city-metro-builder）
+// 路径 = 技能安装根（发行包解压目录，或仓库 skills/city-metro-builder）
 const B = '<skill-root>/scripts/funcs';
 await inject(B + '/query/mt-core.js');
 await inject(B + '/query/mt-node.js');
@@ -125,21 +144,23 @@ await inject(B + '/draw/od.js');
 await inject(B + '/manage/k.js');
 await inject(B + '/draw/plan-map.js'); // 可选：规划图；核验 window.PlanMap.version === '1.1.1'
 await inject(B + '/ops/ops.js');   // 可选：客流运营（排班/票价）
-await inject(B + '/ops/autopilot.js'); // 可选：全自动经营托管（仅 management；核验 MetroAutopilot.version==='0.3.1'）
 await inject(B + '/manage/official-edit.js'); // 可选：官方编辑（配色/编组、官方延长、支线、断线重绘）
 await inject(B + '/manage/fare-lab.js');     // 可选：票价实验（调价/记录/候选方案）
+await inject(B + '/ops/autopilot.js'); // 可选：全自动经营托管（仅 management；依赖 Ops/OE/K；核验 MetroAutopilot.version==='0.3.2'）
 await inject(B + '/modes/mode-registry.js'); // 可选：多模式注册表（metro/hsr/air）
 await inject(B + '/modes/hsr-probe.js');     // 可选：高铁只读探测（预留）
 await inject(B + '/modes/air-probe.js');     // 可选：飞机只读探测（预留）
 const v = await evaluate(() => ({
   MT: window.__metroToolkit && window.__metroToolkit.__version,   // "6.5.3"
-  OD: window.__officialDraw && window.__officialDraw.__version,   // "2.60.0"
+  MTnode: window.__metroToolkit && window.__metroToolkit.__nodeVersion, // "6.5.4"
+  OD: window.__officialDraw && window.__officialDraw.__version,   // "2.60.3"
   K: window.CityMetroKit && window.CityMetroKit.__version          // "2.9"
 }));
 ```
 - `inject` 按宿主替换：VS Code Copilot `page.addScriptTag({path})`；Playwright MCP `browser_evaluate`/`browser_run_code_unsafe`；CDP `Runtime.evaluate`（仓库 `browser/cdp.mjs` 的 `POST /script {file}`）。
-- 幂等（版本守卫）：core/node/amap 各自 `__coreVersion/__nodeVersion/__amapVersion` 应为 6.5.3/6.5.4/6.5.3，OD/K 用 `__version`；可选 PlanMap 用 `version`（1.1.1），Ops 1.3.5，MetroAutopilot 0.3.0；重注入同版跳过。
+- 幂等（版本守卫）：core/node/amap 各自 `__coreVersion/__nodeVersion/__amapVersion` 应为 6.5.3/6.5.4/6.5.3，OD/K 用 `__version`；可选 PlanMap 用 `version`（1.1.1）、Ops 1.3.5、MetroAutopilot 0.3.2、OfficialEdit 1.1.8、FareLab 1.0.1、Modes/HsrProbe/AirProbe 0.1.0；重注入同版跳过。
 - 校验导出：`Object.keys(window.__metroToolkit).sort()`（见 §10）。srhdata 专题优先本地脚本抓取（页面 fetch 可能被 CORS 拦截；勿设 CORS route）。
+- 页面侧只读核对（不装也能查）：注入 `scripts/inject-toolbox.js` 后 `window.__metroToolboxVerify()` 返回 `{ ok, coreOk, degraded, versionTable, missing, mismatched }`，`window.__metroToolboxManifest()` 返回清单与期望版本；二者都不安装模块、不改既有全局。
 
 ### 2.5 坐标转换 / 双地图引擎（默认高德）
 - 页面注入 `coordinate-transform.js` → `window.__CoordTransform`：`gcj2wgs(31.844,117.305)` / `wgs2gcj` / `gcj2bd` / `bd2gcj` / `wgs2bd` / `bd2wgs`。命令行版 `python scripts/coordinate_transform.py gcj2wgs 31.844 117.305`。
@@ -302,6 +323,9 @@ K.regionOf('上海地铁4号线'); K.linesByRegion('上海'); K.status('上海')
 - **建换乘**：只设 isTransfer=true+同 transferGroupId+transferType（+transferSpatiallyUnlinked=true 保持独立坐标），禁用 `_applyTransferDecision`（会拉偏名字/组）；官方 `_applyAutoPassageTransferBetweenStations(a,b)` 可用。建组后 `separateTransferStations`→轻量重绘。
 - **严格校验（防误建）**：`fixTransfers` 同名站坐标差 ≤150m（游戏 SAME_POINT_M=150）才算真换乘；勿把不同位置换乘站并入同一组。手动建组 `K.applyTransfer(lineId,站名,伙伴线,伙伴站,kind)`（自动刷新 UI+分离对象）。
 - **调用逻辑**：绘制后自动 `OD.autoTransfers(lineId,{city,lineNameMatch})`（高德查伙伴→游戏内精确匹配→官方建组，幂等）；换乘核对 `OD.inspect`。
+- **独立坐标校准流程（2026-11-14 实测，强制）**：①按线遍历该线 transfer 站，`K.resolveLineCoord(city,id,names)` 一次取全线 path 投影与 devM；**devM=0 即合格**（即使与伙伴线坐标相同，说明两线 path 在该点重合，不算共享错误）；devM>30m 才列入修复。②devM>300m=out_of_path（高德 path 未覆盖该站，常见于线路分段未收录/在建段）：用 `MT.queryTransferStops(city,[邻站A lng,lat],[邻站B lng,lat],'N号线')` 取相邻站局部 path（返回 `[lng,lat]` 数组）→ 取离现站最近点作该线独立坐标 → 重设相邻两段 `segmentAnchors` 为 path 点（去掉为对齐伙伴线形成的绕行）→ `redrawLine`+`refreshStationDots`。③移动后与伙伴线站点距>150m：保留换乘组并置 `transferSpatiallyUnlinked=true`（长通道换乘），**不强行拉齐坐标**；汇报实测距离。④批量修复按线执行（每线一次 queryLinePaths），勿逐站查询触发高德限流；改前 `K.snapshot`，只轻量重绘受影响线。
+- **跨组共享站对象（2026-11-14 实测）**：`K.separateTransferStations` 只在同一 `transferGroupId` 内分离共享站；跨组/无组的共享对象（实测 8 个）要用 `scripts/transfer-coords.js` 的 `__separateSharedStations()`（按对象身份克隆，保留 name/sid/transferGroupId 等字段，影响线轻量重绘）。分离后同坐标但 dev=0 仍属合格。
+- **脚本化审计/修复**：注入 `scripts/transfer-coords.js` → `await __transferCoordAudit()`（逐线投影，报 dev>30m / out_of_path / 共享对象）与 `await __transferCoordFix({city,dryRun,rebuildNodes})`（校准 + out_of_path 相邻站局部回退 + 长通道置 `transferSpatiallyUnlinked` + 可选重生成节点）。终到站 out_of_path（无相邻两站）不做局部回退，保留坐标并在报告标注。
 - **防卡死**：收尾只对受影响线路 `redrawLine`+`refreshStationDots`，绝不全量 repaint。
 - **绘制换乘站防吸附**：`OD.drawLine` 绘制时自动 `_disableSnap()`（精确放置 distM=0 + 禁用自动建换乘吸附），完成 `_restoreSnap()` 恢复。
 

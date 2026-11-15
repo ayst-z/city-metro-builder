@@ -1,12 +1,12 @@
 # city-metro-builder · 地铁绘制与全自动经营托管技能
 
-`beta1.2`
+`beta1.3`（2026-11-15 已发布；页面自检工具沿用 beta2 命名）
 
-在 [Cities Designers](https://www.citiesdesigners.com)（城市设计师·地铁模拟）里，用**游戏官方接口**绘制地铁线路、按规划图复刻线网、并全自动托管经营。本仓库是一个 Agent Skill：加载即用的指南（`SKILL.md`）+ 可注入工具箱（`scripts/funcs/`）+ 离线图像管线（`scripts/plan-map.py`）+ 回归测试（`_dev/`）。
+在 [Cities Designers](https://www.citiesdesigners.com)（城市设计师·地铁模拟）里，用**游戏官方接口**绘制地铁线路、按规划图复刻线网、并全自动托管经营。本仓库是一个 Agent Skill：加载即用的指南（`SKILL.md`）+ 可注入工具箱（`scripts/funcs/`）+ 离线图像管线（`scripts/plan-map.py`）+ 回归测试（`_dev/`）；所有线路数据可查询、可检查、可回滚。
 
 ## 下载
 
-[GitHub Releases](https://github.com/ayst-z/city-metro-builder/releases) 提供 **纯净整合包 ZIP**（`city-metro-builder-beta1.2-oss.zip`，解压即为技能目录，不含赞赏码）。仓库本体含赞赏码（见文末），发行包不含。
+`city-metro-builder-beta1.3-oss.zip` 已随 [beta1.3 Release](https://github.com/ayst-z/city-metro-builder/releases/tag/beta1.3) 发布；zip 的 size/sha256 记录在仓库根 `README.md`（包内不写自引用数字）。已发布的历史版本 `beta1.2` 仍保留在 [GitHub Releases](https://github.com/ayst-z/city-metro-builder/releases)。此前未发布的 beta2 本地 zip 只是本过程的历史中间件（非正式版，已被 beta1.3 取代），不随本包发布；解压 zip 即为技能目录，不含赞赏码。仓库本体含赞赏码（见文末），发行包不含。
 
 ## 界面预览
 
@@ -40,10 +40,10 @@
 
 | 文档 | 内容 |
 |---|---|
-| [docs/GUIDE.md](docs/GUIDE.md) | 快速开始（注入顺序/查询/绘制/四检/回滚）+ 架构（分层/数据流/不变量/扩展点）+ 13 条排障 |
+| [docs/GUIDE.md](docs/GUIDE.md) | 快速开始（CDP 前置/一次注入/查询/绘制/四检/回滚）+ 架构（分层/数据流/不变量/扩展点）+ 13 条排障 |
 | [docs/PRIVACY.md](docs/PRIVACY.md) | 隐私审核范围、结论与数据合规 |
 | [docs/THIRD_PARTY.md](docs/THIRD_PARTY.md) | 第三方数据与算法来源 |
-| [references/](references/) | 专题：api-reference（全量函数）/ official-draw / operations / plan-map-draw / … |
+| [references/](references/) | 专题：api-reference（全量函数）/ official-draw / operations / plan-map-draw / beta2-acceptance … |
 
 ## 官方绘线
 
@@ -75,7 +75,25 @@
 
 ## 怎么用
 
-拷贝本目录到 agent skills 目录；或按序注入（详见 [docs/GUIDE.md](docs/GUIDE.md)）：`mt-core → mt-node → mt-amap → od → k →（可选）ops/autopilot/official-edit/fare-lab/modes/plan-map`。示例：
+把 zip 解压到宿主的 agent skills 目录，目录名保持 `city-metro-builder`；也可直接使用工作区的 `skills/city-metro-builder`。
+
+**一次注入（推荐）**：`scripts/inject-toolbox.js` 按稳定依赖顺序幂等装好 **13 个核心模块**（5 必需 + 8 可选），并打印逐模块结果、版本表、缺失/版本不符报告：
+
+```bash
+node <skill-root>/scripts/inject-toolbox.js --cdp <cdp-host>:<port>
+```
+
+- 需要 CDP 控制服务（`POST /script` / `POST /eval`）。浏览器桥在**完整仓库**的 `browser/cdp.mjs`，**发行 zip 不含桥**；没有兼容桥时不要硬试，按 `SKILL.md` §2.4 手动逐个注入，效果等价，只是没有版本表与自动中止。
+- 退出码：`0` 全绿 / `2` 可选模块降级 / `1` 失败或中止 / `64` 用法错误。缺必需文件、页面版本比期望更新（默认不降级）会在注入前失败；必需模块失败即中止并报 `partial=true`。
+
+**手动注入顺序（13 个核心模块，不可乱）**：
+
+`mt-core → mt-node → mt-amap → od → k → plan-map → ops → official-edit → fare-lab → autopilot → mode-registry → hsr-probe → air-probe`
+
+`metro-unopened-paths.js`（未开通线瓦片）与 srhdata 数据**不在这 13 个之内**，按需单独注入。
+
+示例：
+
 ```js
 const r = await MT.queryLine('上海','17',{stationFrom:'西岑',stationTo:'虹桥火车站'});
 await OD.drawLine(lineId, r.stations, r.nodes, {});
@@ -85,20 +103,39 @@ MetroAutopilot.start({intervalMs:60000,maxTicks:240,analysisEvery:10});
 
 ## 自检 / 测试
 
-`_dev/`：test-plan-map.py(10) / test-plan-poi.js(17) / test-plan-draw.js(45) / test-autopilot.js(11) / test-branch-ring.js(3) / smoke.js / lint-static.js。改几何必跑全量。
+`_dev/`：test-plan-map.py(10) / test-plan-poi.js(17) / test-plan-draw.js(45) / test-autopilot.js(12) / test-branch-ring.js(3) / smoke.js / lint-static.js。改几何必跑全量。
+
+```powershell
+node _dev/run-all.mjs   # 一条命令顺序跑 7 组，逐项 PASS/FAIL + 汇总，失败/超时非 0 退出
+```
+
+单组默认超时 180s，可用 `--timeout <ms>` 覆盖。页面侧另有 `scripts/beta2-selfcheck.js`（`__beta2SelfCheck()` 只读 19 项、`{live:true}` 只读换乘审计+状态恢复、`__beta2SelfCheckText()` 人类可读报告）与 `scripts/transfer-coords.js`（换乘坐标审计/修复）。验收口径见 `references/beta2-acceptance.md`。
 
 ## 目录
 
 ```
-SKILL.md            主指南（全局硬规则/板块/函数速查）
-references/         专题：api-reference(全量函数)/plan-map-draw/metro-planning-principles/operations/…
-scripts/funcs/      注入工具箱（query/draw/manage/ops/modes）
-scripts/plan-map.py 离线配准+追线
-_dev/               回归测试
-docs/               第三方声明 / 截图 / 文档 / 赞赏码
+SKILL.md                    主指南（全局硬规则/板块/函数速查）
+references/                 专题：api-reference / plan-map-draw / metro-planning-principles / operations / beta2-acceptance …
+scripts/funcs/              注入工具箱（query/draw/manage/ops/modes）
+scripts/inject-toolbox.js   一次注入编排（13 核心模块，幂等 + 版本表/缺失报告）
+scripts/beta2-selfcheck.js  页面只读自检 + live 只读往返 + 文本报告
+scripts/transfer-coords.js  换乘站坐标审计/修复（本线 path 投影）
+scripts/plan-map.py         离线配准 + 追线
+_dev/run-all.mjs            7 组离线回归一键入口（逐项 PASS/FAIL）
+_dev/                       其余单组测试
+docs/                       本文档集 / 截图 / 第三方声明
 ```
 
 ## 更新日志
+
+### beta1.3（2026-11-15，已发布；内部自检工具仍名 beta2）
+
+- **一次注入**：`scripts/inject-toolbox.js` 按稳定依赖顺序幂等装 13 个核心模块（5 必需 + 8 可选）；依赖顺序修正为 `ops → official-edit → fare-lab → autopilot`，`autopilot` 不再早于它依赖的 OE；缺文件/版本不符不半装，报告含逐模块结果与版本表。
+- **统一测试入口**：`_dev/run-all.mjs` 一条命令跑 7 组，逐项 PASS/FAIL、失败/超时非 0 退出；Autopilot 回归 12 项。
+- **自检可读报告**：`__beta2SelfCheckText()` / `__beta2SelfCheckReport(r)` 输出通过/失败/跳过、livePass、恢复与换乘审计摘要，不改变旧返回结构。
+- **live 安全化（待实机复跑）**：live 改为可逆往返——记录暂停/速度，换乘只做**只读**审计，成功/异常都在 `finally` 恢复并报告恢复证据；不再依赖写接口来判定通过。本轮尚未实机复跑，验收记录标为待验证。
+- **同步守卫**：`tools/check-sync.mjs` 校验真源↔安装副本、release.json↔SKILL/GUIDE 版本行、发行输入；构建前置预检，fresh clone/CI 需显式 `--skip-install-check`。
+- **发行 zip 防覆盖**：同名 zip 默认拒绝覆盖，`--force` 才允许；临时文件校验通过后原子替换，失败清理临时文件、旧 zip 不受影响。
 
 ### beta1.2（2026-11-13）
 
@@ -118,15 +155,15 @@ docs/               第三方声明 / 截图 / 文档 / 赞赏码
 
 首个开源整合包：官方绘线 + 规划图复刻 + 经营运营 + MetroAutopilot 0.3.0 全自动托管。
 
-## 隐私与许可
-
-不含个人存档/本机路径/密钥/城市站表/版权规划图；发行包纯净。MIT（LICENSE）；数据与算法来源见 docs/THIRD_PARTY.md（高德/OSM 数据遵循提供方条款，坐标转换/样条/DP/Chaikin/A* 为公共算法原创实现）。
-
 ## 反馈与支持
 
 如果这个项目对你有帮助，欢迎扫码赞赏（卧龙凤雏 的赞赏码）：
 
 ![reward-qr](docs/reward-qr.png)
+
+## 隐私与许可
+
+不含个人存档/本机路径/密钥/城市站表/版权规划图；发行包纯净。MIT（LICENSE）；数据与算法来源见 docs/THIRD_PARTY.md（高德/OSM 数据遵循提供方条款，坐标转换/样条/DP/Chaikin/A* 为公共算法原创实现）。
 
 ## 许可证
 

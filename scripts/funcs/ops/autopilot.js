@@ -1,5 +1,5 @@
 /**
- * MetroAutopilot · 全自动经营托管（0.3.0 · 自递归优化 + AI 分析升级）
+ * MetroAutopilot · 全自动经营托管（0.3.2 · 自递归优化 + AI 分析升级；周期巡检按距上次分析 tick 数判定）
  * 注入: window.MetroAutopilot（依赖 MetroOps / OfficialEdit / CityMetroKit）
  * 闭环: 测量(区间营收)→分析(规则+恰当时机 AI 智能体)→调整策略→再测量→自递归优化直至收敛/预算/挂起。
  * 自递归: optimizeCycle({maxDepth,intervalMs,eps}) 异步递归；每层 tick→adaptStrategy(爬山/坐标下降)→

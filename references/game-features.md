@@ -44,7 +44,7 @@
 
 | # | 功能 | 入口 | 自动化 API / 做法 | 状态 | 建议 |
 |---|---|---|---|---|---|
-| C1 | 示意图 v2/v3/v4/v5 | 导航 v2–v5 | `top.openMetroDiagramView()` + 面板按钮；布局存 `METRO_SCHEMATIC_SAVE_STORAGE_PREFIX*` | 🟡 | 面板块多，按版本说明操作 |
+| C1 | 示意图 v2/v3/v4/v5 | 导航 v2–v5 | `top.openMetroDiagramView()` 打开（`#screen-metro-diagram`）/ `top.closeMetroDiagramView()` 关闭（或 `#metro-diagram-btn-back`）；布局存 `METRO_SCHEMATIC_SAVE_STORAGE_PREFIX*` | 🟡 | 2026-11-14 实机验证开/关正常；面板块多，按版本说明操作 |
 | C2 | transit-map（MIP 八向） | `#nav-btn-transit-map` | 面板打开 + 参数；布局持久化 | 🟡 | 只读/生成，不自动改存档 |
 | C3 | 重新绘制 / 绘图样式 | `#nav-btn-diagram-redraw` / `-style` | 面板按钮 | 🟡 | 先备份布局 |
 | C4 | 规划图 / 图片复刻 | 图片 | `references/plan-map-draw.md` + 拟合算法 | 🟢 | 多次比对门禁 |
@@ -55,7 +55,7 @@
 | # | 功能 | 入口 | 自动化 API / 做法 | 状态 | 建议 |
 |---|---|---|---|---|---|
 | D1 | 控制中心（车站/线路/导航） | `#nav-btn-control-center` | `openRidershipPanel('lines'\|'stations'\|'navigation')` | 🟡 | 只读面板，不代改 |
-| D2 | 运营日报 / 24h 客流 | `#nav-btn-flow-dashboard` | `initFlowChordPanel` / `flowDashboard*` 系列 | 🔵 | 创意模式显示“不显示经营数据”属正常 |
+| D2 | 运营日报 / 24h 客流 | `#nav-btn-flow-dashboard` | 打开后 `#panel-flow-dashboard`；关闭 `top.closeFlowDashboardPanel()`（或 `.flow-dashboard-close`）；`initFlowChordPanel` / `flowDashboard*` 系列 | 🔵 | 2026-11-14 实机验证开/关正常；创意模式显示“不显示经营数据”属正常 |
 | D3 | 重新加载客流 | `#nav-btn-flow-reload` | 面板按钮 / `redrawAllMetroOverlays()` | 🟡 | 大存档分批 |
 | D4 | 站点环视 | `#nav-btn-station-tour` | `stationTourRunning` / 面板按钮 | 🟡 | 只读体验功能 |
 | D5 | 搜索地铁站/线路 | `#nav-btn-metro-search` | 面板搜索 | 🟡 | 结果只读 |

@@ -162,6 +162,14 @@ togglePause(); setSpeed(60, document.body)
 - 购买后 `total/purchased` 增加、`used` 不变；**建线消耗 km/stations，快车会消耗 cars（实测 used 8）**。
 - 建议：保留 30–40% 余额做运营；按 10km/5 站批量购买；快线额度只在有长走廊/高需求线时买。
 
+### 8.1 配额计价与建线扣费口径（2026-11-14 源码核对）
+
+- 建线提交走 `metroQuotaLineInputRaw(line)`：`stationCount = line.stations.length`（**换乘站不减免**，每线每站各计一次）、`km = calcLinKm(line)`；再 `MetroEconomy.dispatch('metro.line.commit', …)`。额度不足时整体失败并提示「{额度}不足，无法确认建设」，**原子失败、不留半成品**。
+- 推论：经营档建 N 站线需 N 站额度，复用现有换乘站一样占额度（本档实测 647 站实例 / 646 站额度，即按每线站数计）。
+- 单站操作：新增 `metro.station.add.commit`（消耗）；删除 `metro.station.delete.commit`（**返还额度**）；移动 `metro.station.move.commit`（调整里程额度）。
+- **价格随已购数量递增**：2026-11-13 目录价（10km $300k / 5站 $150k / 6车 $60k）只在低购买量成立；2026-11-14 本档（已购 630 站）下一车站包 **$5,177,298**、里程包 **$1,519,750**。预算一律以 `MetroEconomy.metroPurchaseQuote({system:'metro',quotaKey:'stations'|'km'|'cars'|'expressLines'}, 1)` 实时报价为准，勿用旧目录价。
+- 上海经营档建 4 号线（26 站 / 32.34km）≈ 26 站 + ≥27km 额度 ≈ 6 车站包 + 3 里程包，按现价约 **$3,560 万**；先精确报价再决定攒钱或改用创意档。
+
 ## 9. 快慢车（Express）
 
 ```js
@@ -429,7 +437,7 @@ OE.stopQuotaBuyLoop();
 - Ops 1.3.4：短交路/快车权重只读 `station.flowByLine[line.id].boardedWindow`，不再用混合 `station.flow`；窗口先计算各站权重后滚动求和，窗口搜索 O(n)，无样本不推荐新增短交路或快车。
 - day98 夜间调整上海15号线既有小交路：紫竹高新区—娄山关路（0–17）改为景西路—上海西站（5–22），保留1/1/1频次及主交路。用官方 `buildCommittedRouteLegsFromDraft`→`persistRouteLegsOnLine(line,draft)`→指定leg排班，coverage=null。历史上客覆盖266250→370620（约+39%），这不是已实现收益增幅，净收益及拥堵改善待白天验证。会话回退记录 `window.__short15Before`，id保持不变。
 
-## 21. 全自动经营托管 MetroAutopilot 0.3.1（自递归优化 + AI 分析升级，2026-11-12）
+## 21. 全自动经营托管 MetroAutopilot 0.3.2（自递归优化 + AI 分析升级，2026-11-12）
 
 - 注入 `scripts/funcs/ops/autopilot.js`（Ops/OE/K 之后）→ `window.MetroAutopilot`。仅 `G.economyMode==='management'` + metro + 非编辑态可用；创意档/编辑态拒绝。
 - `start({intervalMs=60000,maxTicks=240,buyPacks=1,dryRun=false})` 有界循环；`stop()`；`status()` 返回 running/ticks/last/log(近50)。每 tick：快照→票价→排班→快车/小交路→配额→恢复模拟→营收复核→日志；失败即停、超 maxTicks 自停。
@@ -437,11 +445,13 @@ OE.stopQuotaBuyLoop();
 - **排班逐交路**：多交路线按 legIndex 逐腿 `recommendSchedule`/`applySchedule`，不把同一频次套全部腿；无样本档保留当前服务。单交路整线。
 - **快车/小交路额度内**：`recommendNetwork` 给出候选，快车受 `expressLines total-used` 上限、小交路仅单交路线且覆盖连续才加；不重复加。
 - **配额递增报价**：`OE.economyPlan({includeOperations:false})` 取下一缺口；每包购买前重报 `metroPurchaseQuote`，`usable=balance-dailyReserve` 且留 nextLine.reserve 才买；每 tick 限 buyPacks 包；不足即等经营收益，不预支。
-- **安全**：不切模式/不改资金/不绕配额/不存档/不下载/不抢前台；每 tick `K.snapshot`；`dryRun:true` 只算不写。营收复核用 `revenueSnapshot/revenueDelta`，劣化应回滚（restoreSchedule/applyFares 旧值）并停托管复查。
+- **安全**：不切模式/不改资金/不绕配额/不存档/不下载/不抢前台；每 tick `K.snapshot`；`dryRun:true` 只算不写。
+- **自动编组与手动购车（2026-11-14 更正）**：`metroAutoArrangementToggle()`（按钮 `#line-info-btn-auto`，状态存 localStorage `metro:autoTrainArrangement`=`1`/`0`）是游戏自带自动编组开关（每 5s 采样、30s 收缩）。本档曾出现 4 次 `quota_purchase` 共约 **$12,300,000**，经用户确认**是手动购买，不是自动编组行为**。纪律：看到购车/购额度流水先向用户确认来源，**不得擅自改 `metro:autoTrainArrangement` 等用户设置**；需要调整先询问。营收复核用 `revenueSnapshot/revenueDelta`，劣化应回滚（restoreSchedule/applyFares 旧值）并停托管复查。
 - 建线不在托管默认范围（避免自动大改线网）；如需自动扩张另给 buildQueue 走官方接口单独验收。托管=运营+配额托管。
 - **自递归优化（0.3.0）**：`optimizeCycle({maxDepth,intervalMs,eps})` 异步递归 tick→测量区间营收→`adaptStrategy`(爬山/坐标下降：改进则放宽增班上限、劣化则收缩)→再递归，直至收敛(连续3次 eps 内无改进)/达 maxDepth/挂起分析；策略受 LIMITS 安全边界(perLineCap4-16/perLineInc1-8/maxNewExpressShort0-2/buyPacks1-3)。
 - **AI 分析升级（恰当时机）**：营收劣化(超 regressionThreshold)/客流未加载/连续劣化≥2/周期巡检(analysisEvery) → 置 `pendingAnalysis` 暂停自动改动 + `opts.onAnalysis(request)` 通知宿主；宿主 spawn AI 智能体分析后 `resolveAnalysis(result)` 应用建议(fare/schedule/strategy 受边界)并恢复递归。分析未决不改数据。
 - **营收劣化自动回滚（0.3.1）**：tick 前 captureConfig(票价+逐交路排班)，区间净额劣化超 regressionThreshold 自动恢复改动前配置并清零劣化计数，防托管把线网改坏。
+- **周期巡检防重复触发（0.3.2，2026-11-13）**：`periodic-analysis` 由 `ticks % analysisEvery` 改为「`ticks - lastAnalysisTick >= analysisEvery`」判定，并在请求分析/`resolveAnalysis` 时更新 `lastAnalysisTick`；修掉 tick 不前进时每 tick 重复请求分析、`pendingAnalysis` 无法消解的阻塞。
 - 回归 `_dev/test-autopilot.js`（12 项）+ `_dev/test-branch-ring.js`（3 项：支线站台避让/避让剔空中点/环线闭合段数=N）。
 
 
@@ -834,11 +844,11 @@ const q = await MT.queryLine(city, no, { stationFrom, stationTo });
 只读四扫：空节点段 / 占位符站名（`^(站|Station)\d+$`）/ 出入口噪音（`号口`）/ 绕路（折线/直线 ratio>2.2）。
 换乘扫描：跨线同名站但本线 `isTransfer=false` 或无 `transferGroupId` → 缺失；`isTransfer=true` 但无 tg → 孤儿。
 
-| 本线站↔伙伴站距离 | 判定 | 动作 |
+| 本线站↔伙伴站距离 | 判定 | 动作（2026-11-14 修正：换乘站各自独立坐标） |
 |---|---|---|
-| ≤250m | 可直接建 | `K.applyTransfer(本线,站,伙伴线,伙伴站)` |
-| 250–1000m | 超通道上限 | 先 `K.calibrateCoordinates` 校准到伙伴线坐标，再建 |
-| >1000m | 伙伴线未画/错位 | 先确认伙伴线是否存在、坐标是否正确 |
+| ≤150m | 真换乘 | `K.applyTransfer(本线,站,伙伴线,伙伴站)` 建组；**各线用自己的 path 投影坐标**（`K.resolveLineCoord`/`K.calibrateStationToLine`），不得合并/拉齐到伙伴线坐标 |
+| 150–1000m | 长通道换乘 | 保留换乘组 + 置 `transferSpatiallyUnlinked=true`；各线仍用自己坐标；本线 path 未覆盖（out_of_path）时用 `MT.queryTransferStops` 局部段投影并重设相邻 `segmentAnchors` |
+| >1000m | 伙伴线未画/错位 | 先确认伙伴线是否存在、坐标是否正确，再决定是否建组 |
 
 修复硬边界（详见主 `SKILL.md` §0.2）：
 - 小偏差（同站 ≤150m、命名装饰）归官方；大差异（延伸/规划/用户改走向/拆并站）视为用户自绘，**保留不改**。
