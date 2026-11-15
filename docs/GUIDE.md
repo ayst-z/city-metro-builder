@@ -1,6 +1,6 @@
 # 使用指南
 
-> 一篇看完：快速上手 → 架构与不变量 → 排障。技能 v4.4 · 发行 beta1.3（已发布）。
+> 一篇看完：快速上手 → 架构与不变量 → 排障。技能 v4.4.1 · 发行 beta1.3.1（已发布）。
 
 ## 快速开始
 
@@ -103,7 +103,7 @@ RED 风险（删整线、跨城覆盖、批量删除）未确认不执行；未�
 | `scripts/inject-toolbox.js` | Node 侧命令（见「注入」） | 一次注入 + 版本表 + 缺失/版本不符报告 |
 
 - **live 安全口径**：换乘部分只做前后指纹对比，不调用 `fixTransfers`/`separateTransferStations`/`applyTransfer` 等写接口；无论成功或异常，都在 `finally` 恢复原暂停状态与模拟速度。该实现正在做离线验证，本轮**尚待实机复跑**（见 `references/beta2-acceptance.md` §2）。
-- beta1.3 门禁见 `references/beta2-acceptance.md` §4（该文档与 `beta2-selfcheck.js` 沿用 beta2 技术命名）：层1 离线全绿 → 层2 `fail=0` → 层3 `livePass=true` 且状态恢复 → 层4 UI 开关 → 层5 创意档绘线。
+- beta1.3.1 门禁见 `references/beta2-acceptance.md` §4（该文档与 `beta2-selfcheck.js` 沿用 beta2 技术命名）：层1 离线全绿 → 层2 `fail=0` → 层3 `livePass=true` 且状态恢复 → 层4 UI 开关 → 层5 创意档绘线。
 - 换乘修复前先 `K.snapshot`；改坐标后必须 `OD.rebuildNodesFromAmap` 重生成节点；验收 `dev≈0` 为合格（与伙伴线同点不算错），`dev>300m` 判 out_of_path。
 
 ## 架构

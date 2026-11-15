@@ -1,12 +1,12 @@
 # city-metro-builder · 地铁绘制与全自动经营托管技能
 
-`beta1.3`（2026-11-15 已发布；页面自检工具沿用 beta2 命名）
+`beta1.3.1`（2026-11-15 已发布；页面自检工具沿用 beta2 命名）
 
 在 [Cities Designers](https://www.citiesdesigners.com)（城市设计师·地铁模拟）里，用**游戏官方接口**绘制地铁线路、按规划图复刻线网、并全自动托管经营。本仓库是一个 Agent Skill：加载即用的指南（`SKILL.md`）+ 可注入工具箱（`scripts/funcs/`）+ 离线图像管线（`scripts/plan-map.py`）+ 回归测试（`_dev/`）；所有线路数据可查询、可检查、可回滚。
 
 ## 下载
 
-`city-metro-builder-beta1.3-oss.zip` 已随 [beta1.3 Release](https://github.com/ayst-z/city-metro-builder/releases/tag/beta1.3) 发布；zip 的 size/sha256 记录在仓库根 `README.md`（包内不写自引用数字）。已发布的历史版本 `beta1.2` 仍保留在 [GitHub Releases](https://github.com/ayst-z/city-metro-builder/releases)。此前未发布的 beta2 本地 zip 只是本过程的历史中间件（非正式版，已被 beta1.3 取代），不随本包发布；解压 zip 即为技能目录，不含赞赏码。仓库本体含赞赏码（见文末），发行包不含。
+`city-metro-builder-beta1.3.1-clean.zip` 已随 [beta1.3.1 Release](https://github.com/ayst-z/city-metro-builder/releases/tag/beta1.3.1) 发布；zip 的 size/sha256 记录在仓库根 `README.md`（包内不写自引用数字）。已发布的历史版本 `beta1.2` 仍保留在 [GitHub Releases](https://github.com/ayst-z/city-metro-builder/releases)。此前未发布的 beta2 本地 zip 只是本过程的历史中间件（非正式版，已被 beta1.3.1 取代），不随本包发布；解压 zip 即为技能目录，不含赞赏码。仓库本体含赞赏码（见文末），发行包不含。
 
 ## 界面预览
 
@@ -128,7 +128,7 @@ docs/                       本文档集 / 截图 / 第三方声明
 
 ## 更新日志
 
-### beta1.3（2026-11-15，已发布；内部自检工具仍名 beta2）
+### beta1.3.1（2026-11-15，已发布；内部自检工具仍名 beta2）
 
 - **一次注入**：`scripts/inject-toolbox.js` 按稳定依赖顺序幂等装 13 个核心模块（5 必需 + 8 可选）；依赖顺序修正为 `ops → official-edit → fare-lab → autopilot`，`autopilot` 不再早于它依赖的 OE；缺文件/版本不符不半装，报告含逐模块结果与版本表。
 - **统一测试入口**：`_dev/run-all.mjs` 一条命令跑 7 组，逐项 PASS/FAIL、失败/超时非 0 退出；Autopilot 回归 12 项。

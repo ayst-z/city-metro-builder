@@ -1,10 +1,10 @@
-# beta1.3 发行验收清单（beta2 自检工具，2026-11-15，v4.4 已发布）
+# beta1.3.1 发行验收清单（beta2 自检工具，2026-11-15，v4.4.1 已发布）
 
-> 命名说明：**发行版本号是 beta1.3**；本文文件名、`scripts/beta2-selfcheck.js`、`__beta2SelfCheck*` API 沿用 beta2 命名，属技术套件名，**不代表发行版本**，两者不可混用。
+> 命名说明：**发行版本号是 beta1.3.1**；本文文件名、`scripts/beta2-selfcheck.js`、`__beta2SelfCheck*` API 沿用 beta2 命名，属技术套件名，**不代表发行版本**，两者不可混用。
 
 > 本文只记录**已实际执行**的证据；没有跑过的层，明确标为「待实机」，不写 PASS。
 >
-> **本轮状态**：层 1 离线回归 7/7；本地构建层（check-sync 0 drift → build-release → privacy 0 命中）已通过；层 2/3/4/5 尚待实机。**beta1.3 已于 2026-11-15 公开发布**；层 2/3/4/5 仍未实机验证，发布不改变该门禁缺口；不覆盖 beta1.2 的已发布历史与 hash 证据；此前未发布的 beta2 本地 zip 仅为本过程历史中间件。
+> **本轮状态**：层 1 离线回归 7/7；本地构建层（check-sync 0 drift → build-release → privacy 0 命中）已通过；层 2/3/4/5 尚待实机。**beta1.3.1 已于 2026-11-15 公开发布**；层 2/3/4/5 仍未实机验证，发布不改变该门禁缺口；不覆盖 beta1.2 的已发布历史与 hash 证据；此前未发布的 beta2 本地 zip 仅为本过程历史中间件。
 
 ## 0. 验收分层
 
@@ -62,7 +62,7 @@ window.__beta2SelfCheckReport(result);           // 对已有结果做格式化
 
 ## 2. 实测记录
 
-### 2.1 本轮（2026-11-15，v4.4 / beta1.3 已发布）
+### 2.1 本轮（2026-11-15，v4.4.1 / beta1.3.1 已发布）
 
 环境：仓库工作区；Node v24.19.0；Python 3.14.7；离线层不触碰游戏、账号、存档或资金。
 
@@ -76,21 +76,21 @@ window.__beta2SelfCheckReport(result);           // 对已有结果做格式化
 | test-plan-draw | 45/45 |
 | test-autopilot | 12/12 |
 | test-branch-ring | 3/3 |
-| 同步/版本预检 | `node tools/check-sync.mjs --pre-build` **PASS / 0 drift**（安装副本 44/44 应同步文件 sha256 一致；`release.json` v4.4/**beta1.3** = SKILL 版本行 = GUIDE 版本行；发行素材 10/10）。构建前置预检走默认严格模式，未用 `--skip-install-check` |
-| 发行构建 | `node tools/build-release.mjs` 退出码 0：`release/.build/oss` 52 文件 / `repo` 53 文件；构建前 `release/city-metro-builder-beta1.3-oss.zip` 不存在，未覆盖、未加 `--force`，beta1.2 zip 与 hash 未触碰；zip 体积与 sha256 见仓库 README（包内不写自引用数字）。未发布的 `city-metro-builder-beta2-oss.zip` 保留为本过程历史中间件，**非正式版、不对外发布** |
+| 同步/版本预检 | `node tools/check-sync.mjs --pre-build` **PASS / 0 drift**（安装副本 44/44 应同步文件 sha256 一致；`release.json` v4.4.1/**beta1.3.1** = SKILL 版本行 = GUIDE 版本行；发行素材 10/10）。构建前置预检走默认严格模式，未用 `--skip-install-check` |
+| 发行构建 | `node tools/build-release.mjs` 退出码 0：`release/.build/oss` 52 文件 / `repo` 53 文件；构建前 `release/city-metro-builder-beta1.3.1-clean.zip` 不存在，未覆盖、未加 `--force`，beta1.2 zip 与 hash 未触碰；zip 体积与 sha256 见仓库 README（包内不写自引用数字）。未发布的 `city-metro-builder-beta2-oss.zip` 保留为本过程历史中间件，**非正式版、不对外发布** |
 | 隐私审核 | `node tools/privacy-audit.mjs` **PRIVACY PASS — 105 文件（oss/repo 2 变体）0 命中**，退出码 0 |
 | zip 内容核对 | 解包逐文件 sha256 与真源/`.build/oss` 一致（文件集无缺、无多、无内容差异）；含 13 模块注入器 `scripts/inject-toolbox.js`、自检 `scripts/beta2-selfcheck.js`、7 组回归入口 `_dev/run-all.mjs`；无 `__pycache__`、旧版 `SKILL.pre_rearch.md`/`SKILL.bak_*`、临时/备份文件残留 |
 | 实机层 2/3/4/5 | **待实机**（本文不写 PASS；需按 §1.2/§4 逐层复跑） |
 
 > 说明：本轮离线修复（一次性注入依赖顺序、统一 7 组入口、自检文本报告、live 只读化与恢复、同步守卫、zip 防覆盖）已在各自离线测试/临时 fixture 中验证；本文只把可复现的层 1 与本地构建结果列为发版证据，其余按层 2-5 待验证记录。
 >
-> 版本号调整（2026-11-15，用户要求）：发布前对外版本号由 beta2 调整为 **beta1.3**（随后 2026-11-15 发布），`skillVersion` 仍 4.4；**技术内部命名与 API 保持兼容不变**（`scripts/beta2-selfcheck.js`、`__beta2SelfCheck()/__beta2SelfCheckText()/__beta2SelfCheckReport()`、`references/beta2-acceptance.md`），避免既有页面注入脚本与调用方失效。
+> 版本号调整（2026-11-15，用户要求）：发布前对外版本号由 beta2 调整为 **beta1.3.1**（随后 2026-11-15 发布），`skillVersion` 仍 4.4；**技术内部命名与 API 保持兼容不变**（`scripts/beta2-selfcheck.js`、`__beta2SelfCheck()/__beta2SelfCheckText()/__beta2SelfCheckReport()`、`references/beta2-acceptance.md`），避免既有页面注入脚本与调用方失效。
 >
 > zip 的 sha256/size **不写进包内**：本文随包发布，写进哈希会改变 zip 自身内容、形成自引用。实际 hash/size 记录在仓库根 `README.md` 与 `release/.build/post-build-evidence-beta1.3.txt`（`.build` 不入库）。
 
 ### 2.2 历史证据（2026-11-14，旧 live 实现，仅留档）
 
-> 以下为 2026-11-14 的历史记录（当时内部候选称 beta2，本轮对外版本号已改为 beta1.3）。当时的 live 实现包含写操作、且未强制状态恢复；其中 `livePass=true` **只属于旧实现的历史结果，本轮不复用、不作为发版门禁证据**。
+> 以下为 2026-11-14 的历史记录（当时内部候选称 beta2，本轮对外版本号已改为 beta1.3.1）。当时的 live 实现包含写操作、且未强制状态恢复；其中 `livePass=true` **只属于旧实现的历史结果，本轮不复用、不作为发版门禁证据**。
 
 环境：上海经营档 24 线 / 647 站，高德引擎，余额约 428 万；配额 km 673.94/680、stations 646/646、cars 1227/1230、express 0/6。
 
@@ -102,26 +102,26 @@ window.__beta2SelfCheckReport(result);           // 对已有结果做格式化
 | 换乘坐标脚本化 | `__transferCoordAudit()` 24 线；问题仅 1 条：苏州11号线·唯亭（终到站 out_of_path，无相邻两站不做局部回退，保留坐标并标注）；`__separateSharedStations()` 共享对象 8→0；`__transferCoordFix({city:'苏州'})` 后 25 组长通道置 `transferSpatiallyUnlinked`；全部线路站数/换乘数不变、`OD.inspect` 0 问题 |
 | UI 入口 | 示意图 `#screen-metro-diagram` 开→`closeMetroDiagramView()` 关；运营日报 `#panel-flow-dashboard` 开→`closeFlowDashboardPanel()` 关 |
 
-## 3. 已知缺口（beta1.3 发布前必须关闭）
+## 3. 已知缺口（beta1.3.1 发布前必须关闭）
 
 1. **层 2/3 实机复跑**：页面只读 19 项与新的 live 只读往返（含状态恢复）需在真实页面执行并保存报告文本；本轮未做。
 2. **层 4 UI 实机**：示意图/日报开关以本轮构建复验。
 3. **层 5 绘线实机**：经营档 quota 用尽，建线会扣费/失败 → 需创意档（`anycity-global_mode_creative` 草稿）跑一次建线→支线→环线→删除，记录每步返回与 `OD.inspect`。
 4. **终到站 out_of_path**：苏州11号线·唯亭（与3号线换乘）为线路端点，无相邻两站、局部 path 回退不适用；需用户确认该站独立坐标（POI/图纸）或保留现有共享点。
 5. **额度购买实机**：涉及资金（车站包报价 517 万），需用户授权或小额包+快照回滚验证报价/扣款/used 变化。
-6. **HSR/航空**：不在「地铁功能」范围，维持 `references/operations.md` 预留说明，不作 beta1.3 门禁。
-7. **发行**：beta1.3 已公开发布：本地构建与隐私审核已完成，公开库 main + annotated tag 与 Release 资产已上传；层 2–5 实机缺口仍待补测。未发布的 beta2 本地 zip 已作为历史中间件保留，不再作为候选。
+6. **HSR/航空**：不在「地铁功能」范围，维持 `references/operations.md` 预留说明，不作 beta1.3.1 门禁。
+7. **发行**：beta1.3.1 已公开发布：本地构建与隐私审核已完成，公开库 main + annotated tag 与 Release 资产已上传；层 2–5 实机缺口仍待补测。未发布的 beta2 本地 zip 已作为历史中间件保留，不再作为候选。
 
-## 4. beta1.3 发版门禁
+## 4. beta1.3.1 发版门禁
 
 - [x] 层1 全绿：`node _dev/run-all.mjs` **7/7**（2026-11-15 实跑，退出码 0）
 - [ ] 层2 `__beta2SelfCheck()` fail=0（待实机）
 - [ ] 层3 `__beta2SelfCheck({live:true})` `livePass=true`，`stateRestored`/`pausedRestored` 为真、`transferAudit.unchanged=true`、`restoreErrors` 为空（待实机；当前只读+恢复实现待复跑）
 - [ ] 层4 示意图/日报 开→关 均正常（待实机）
 - [ ] 层5 创意档绘线验收通过（建线/支线/环线/删除各 1 次 + inspect 0；待实机）
-- [x] 版本与文档同步：`release/release.json` tag=**beta1.3** / skillVersion=4.4 / zip=`city-metro-builder-beta1.3-oss.zip`，SKILL 版本行与 GUIDE 版本行一致（check-sync 预检）
+- [x] 版本与文档同步：`release/release.json` tag=**beta1.3.1** / skillVersion=4.4 / zip=`city-metro-builder-beta1.3.1-clean.zip`，SKILL 版本行与 GUIDE 版本行一致（check-sync 预检）
 - [x] `node tools/build-release.mjs` 通过（退出码 0，oss 52 / repo 53 文件）；`node tools/privacy-audit.mjs` 0 命中（105 文件）；beta1.2 zip 与 sha256 未改动
-- [x] 公开库 main + annotated tag beta1.3；Release 资产上传（2026-11-15 已发布；beta2 仅是过程中间件，不发布）
+- [x] 公开库 main + annotated tag beta1.3.1；Release 资产上传（2026-11-15 已发布；beta2 仅是过程中间件，不发布）
 
 ## 5. 记录纪律
 

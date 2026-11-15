@@ -7,7 +7,7 @@ description: '在 Cities Designers（citiesdesigners.com 城市设计师·地铁
 
 > ⚡ **答复最高准则（2026-09-06，凌驾其它一切约定）**：**不要输出任何礼貌性用语**——不寒暄/不道歉/不写"好的·收到·没问题·请问·请·辛苦·祝·期待"等客套；**直接给出最有用的信息**：先结论（结果/判定/差异/数据）→ 最小必要解释 → 下一步动作。能用要点/表格一句话说完，不写三句。
 
-> **版本（2026-11-15 v4.4 / 开源 beta1.3 · 已发布）**：MT **6.5.3/6.5.4/6.5.3**（core/node/amap）· OD **2.60.3** · K **2.9** · Ops **1.3.5** · OE **1.1.8** · FareLab **1.0.1** · Modes **0.1.0** · PlanMap **1.1.1**（可选）· MetroAutopilot **0.3.2**（可选，全自动经营托管）。代码基线 = `scripts/funcs/`；函数表按源码实际导出键校准（MT 84 / OD 38 / K 62，见 §10）。v3 高效版已并入本技能（`references/operations.md` §23）；**默认高德 + AMap/OSM 双引擎特调**（`references/map-engines.md`）；全游戏功能矩阵见 `references/game-features.md`；多模式预留见 `scripts/funcs/modes/README.md`；浏览器扩展为废案，不再维护或注入。
+> **版本（2026-11-15 v4.4.1 / 开源 beta1.3.1 · 已发布）**：MT **6.5.3/6.5.4/6.5.3**（core/node/amap）· OD **2.60.3** · K **2.9** · Ops **1.3.5** · OE **1.1.8** · FareLab **1.0.1** · Modes **0.1.0** · PlanMap **1.1.1**（可选）· MetroAutopilot **0.3.2**（可选，全自动经营托管）。代码基线 = `scripts/funcs/`；函数表按源码实际导出键校准（MT 84 / OD 38 / K 62，见 §10）。v3 高效版已并入本技能（`references/operations.md` §23）；**默认高德 + AMap/OSM 双引擎特调**（`references/map-engines.md`）；全游戏功能矩阵见 `references/game-features.md`；多模式预留见 `scripts/funcs/modes/README.md`；浏览器扩展为废案，不再维护或注入。
 > **2026-09-27 更新适配**：9-24/9-27 新增经营模式/高铁/航空/Voyager，指引与经济全局 API 速查见 `references/operations.md` §22（不影响 §1-§8 绘线主流程）。
 > **本版架构**：`§0 最高全局要求（先读）` → `§1-§8 功能板块`（每板块=功能定位/调用逻辑/使用规则/注意事项）→ `§9 不便分类的条件特例` → `§10 函数速查表`。
 > **旧文档备份**：`SKILL.pre_rearch.md` / `SKILL.bak_*.md`（历史实测细节全文保留，供回溯）。
@@ -98,7 +98,7 @@ description: '在 Cities Designers（citiesdesigners.com 城市设计师·地铁
 
 **文件清单**：`SKILL.md`（主文档）· `references/{official-draw,batch-ops,plan-map-draw,api-reference,metro-planning-principles,metro-replication-workflow,map-engines,game-features,ui-features,operations,beta2-acceptance}.md` · `scripts/funcs/{query/mt-core,query/mt-node,query/mt-amap,draw/od,draw/plan-map,manage/k,manage/official-edit,manage/fare-lab,modes/mode-registry,modes/hsr-probe,modes/air-probe}.js`（**唯一权威源码**）· `scripts/funcs/modes/README.md`（多模式结构与预留契约）· `scripts/{inject-toolbox.js（一次注入编排）,plan-map.py,fetch_subway_data.py,coordinate-transform.js,coordinate_transform.py,audit-game-features.js,beta2-selfcheck.js,transfer-coords.js}` · `scripts/funcs/ops/ops.js`（客流运营）· `scripts/funcs/ops/autopilot.js`（全自动经营托管）· `_dev/run-all.mjs`（7 组离线回归一键入口）· `_dev/{smoke,lint-static}.js`（Node VM 冒烟 + 静态一致性）· `_dev/test-plan-map.py`（10项）/`_dev/test-plan-poi.js`（17项）/`_dev/test-plan-draw.js`（45项）/`_dev/test-autopilot.js`（12项）/`_dev/test-branch-ring.js`（3项，规划图/POI/绘制/托管回归）。参考：`references/{ui-features,game-features,map-engines,operations}.md`。旧单文件（MT 5.5 / OD 2.29 / K 2.11）与浏览器扩展已归档，非注入基线。
 
-**beta1.3 实机验收（beta2 自检工具，2026-11-15，v4.4 已发布）**：清单/记录见 `references/beta2-acceptance.md`（文件名与 `__beta2SelfCheck*` API 沿用 beta2 命名，属技术套件名，不代表发行版本）。页面注入 `scripts/beta2-selfcheck.js` 后：`await __beta2SelfCheck()` 只读自检，`await __beta2SelfCheck({live:true})` 做「记录暂停/速度→暂停→排班往返/票价幂等→只读换乘审计→finally 恢复」的实机往返；`__beta2SelfCheckText()` 返回人类可读报告。本轮层 1 已 7/7，层 2/3/4/5 尚待实机复跑，门禁以该文档 §4 为准。
+**beta1.3.1 实机验收（beta2 自检工具，2026-11-15，v4.4.1 已发布）**：清单/记录见 `references/beta2-acceptance.md`（文件名与 `__beta2SelfCheck*` API 沿用 beta2 命名，属技术套件名，不代表发行版本）。页面注入 `scripts/beta2-selfcheck.js` 后：`await __beta2SelfCheck()` 只读自检，`await __beta2SelfCheck({live:true})` 做「记录暂停/速度→暂停→排班往返/票价幂等→只读换乘审计→finally 恢复」的实机往返；`__beta2SelfCheckText()` 返回人类可读报告。本轮层 1 已 7/7，层 2/3/4/5 尚待实机复跑，门禁以该文档 §4 为准。
 
 ---
 
